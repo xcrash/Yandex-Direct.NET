@@ -1,4 +1,4 @@
------ Благими делами вымощена дорога в Ад. -----
+----- Благими намерениями вымощена дорога в Ад. -----
 
 Получение pfx из файлов, отдаваемых Яндексом:
 openssl pkcs12 -in "C:\cert\cert.crt" -inkey "C:\cert\private.key" -export -out C:\cert\account.pfx
