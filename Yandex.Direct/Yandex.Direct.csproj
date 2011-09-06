@@ -49,8 +49,11 @@
     <Compile Include="Data Classes\ShortClientInfo.cs" />
     <Compile Include="Data Classes\SiteLinkInfo.cs" />
     <Compile Include="Data Classes\TransferInfo.cs" />
-    <Compile Include="Data Classes\YandexError.cs" />
+    <Compile Include="Data Classes\YandexErrorInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="YandexSignature.cs" />
+    <Compile Include="YapiResponse.cs" />
+    <Compile Include="YapiService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

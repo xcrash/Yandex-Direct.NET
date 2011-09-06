@@ -27,16 +27,17 @@ namespace Yandex.Direct
         public string StatusModerate { get; set; }
         public string StatusActivating { get; set; }
         public string StatusArchive { get; set; }
+
+        // ReSharper disable UnassignedField.Local
         [JsonIgnore]
         public bool IsActive
         {
             get { return _isActive == "Yes"; }
         }
-        // ReSharper disable UnassignedField.Local
-
         [JsonProperty("IsActive"), DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string _isActive;
-        public decimal SumAvailableForTransfer { get; set; }
         // ReSharper restore UnassignedField.Local
+
+        public decimal SumAvailableForTransfer { get; set; }
     }
 }

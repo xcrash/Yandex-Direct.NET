@@ -3,7 +3,7 @@
 namespace Yandex.Direct
 {
     [JsonObject]
-    public sealed class YandexError
+    public sealed class YandexErrorInfo
     {
         [JsonProperty("error_str")]
         public string Error { get; set; }
