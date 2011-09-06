@@ -31,6 +31,16 @@ namespace Yandex.Direct
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) => true;
         }
 
+        /// <summary>
+        /// Создать клиента для Яндекс-Директа, используя файл конфигурации (секция yandex.direct)
+        /// </summary>
+        public YapiService()
+            : this(YapiSettings.FromConfiguration())
+        { }
+
+        /// <summary>
+        /// Создать клиента для Яндекс-Директа, указав путь к файлу сертификата и пароль
+        /// </summary>
         public YapiService(string certificatePath, string certificatePassword)
             : this(new YapiSettings(certificatePath, certificatePassword))
         { }
