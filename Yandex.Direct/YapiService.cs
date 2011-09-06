@@ -39,7 +39,7 @@ namespace Yandex.Direct
 
         private string HttpRequest(string method, string parametersJson, bool sign = false)
         {
-            Contract.Requires(!sign || !string.IsNullOrWhiteSpace(this.Setting.MasterToken), "Financial operations require MasterToken and DefaultLogin to be set");
+            Contract.Requires(!sign || !string.IsNullOrWhiteSpace(this.Setting.MasterToken), "Financial operations require MasterToken and Login to be set");
 
             var request = (HttpWebRequest)WebRequest.Create(this.Setting.ApiAddress);
             request.ClientCertificates.Add(new X509Certificate2(this.Setting.CertificatePath, this.Setting.CertificatePassword));
@@ -69,7 +69,7 @@ namespace Yandex.Direct
 
             if (sign)
             {
-                var signature = new YandexSignature(this.Setting.MasterToken, method, this.Setting.DefaultLogin);
+                var signature = new YandexSignature(this.Setting.MasterToken, method, this.Setting.Login);
                 add("finance_token", signature.Token);
                 add("operation_num", signature.OperationId);
                 add("login", signature.Login);
