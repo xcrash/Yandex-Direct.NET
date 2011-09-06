@@ -10,13 +10,11 @@ namespace Yandex.Direct
         public long OperationId { get; private set; }
         public string Login { get; private set; }
 
-        public string MasterToken { get; set; }
-
-        public YandexSignature(string method, string login)
+        public YandexSignature(string masterToken, string method, string login)
         {
             this.Login = login;
             this.OperationId = LongNumber();
-            var raw = String.Format("{0}{1}{2}{3}", MasterToken, this.OperationId, method, this.Login);
+            var raw = String.Format("{0}{1}{2}{3}", masterToken, this.OperationId, method, this.Login);
             this.Token = ComputeHash(raw);
         }
 

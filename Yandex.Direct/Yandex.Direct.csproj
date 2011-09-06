@@ -35,12 +35,18 @@
       <HintPath>..\packages\Newtonsoft.Json.4.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="YapiService.ApiCommands.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="YapiLanguage.cs" />
+    <Compile Include="YapiSettings.cs" />
+    <Compile Include="Configuration\YandexDirectSection.cs" />
     <Compile Include="Data Classes\BannerInfo.cs" />
     <Compile Include="Data Classes\BannerPhraseInfo.cs" />
     <Compile Include="Data Classes\BannerRequestInfo.cs" />
@@ -56,8 +62,10 @@
     <Compile Include="YapiService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

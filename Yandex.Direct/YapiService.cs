@@ -11,83 +11,44 @@ using Newtonsoft.Json.Converters;
 
 namespace Yandex.Direct
 {
-    public class YapiService
+    public partial class YapiService
     {
-        public static class ApiCommand
-        {
-            public const string TransferMoney = "TransferMoney";
-            public const string PingApi = "PingAPI";
-            public const string GetClientsList = "GetClientsList";
-            public const string GetCampaignsList = "GetCampaignsList";
-            public const string GetBanners = "GetBanners";
-            public const string CreateOrUpdateBanners = "CreateOrUpdateBanners";
-            public const string GetClientsUnits = "GetClientsUnits";
-        }
-
-        const string ApiAddress = @"https://soap.direct.yandex.ru/json-api/v4/";
-        const string RequestLocale = "en";
-        private string CertificatePath { get; set; }
-        string CertificatePassword { get; set; }
-        public string MasterToken { get; set; }
-        public string DefaultLogin { get; set; }
+        public YapiSettings Setting { get; private set; }
 
         private JsonSerializerSettings JsonSettings { get; set; }
 
-
-        public YapiService(string certificatePath, string certificatePassword)
+        public YapiService(YapiSettings settings)
         {
-            this.CertificatePath = certificatePath;
-            this.CertificatePassword = certificatePassword;
-
+            Contract.Requires(settings != null);
+            this.Setting = settings;
             this.JsonSettings =
                 new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        Converters = { new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-dd" } }
-                    };
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Converters = { new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-dd" } }
+                };
 
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, errors) => true;
         }
+
+        public YapiService(string certificatePath, string certificatePassword)
+            : this(new YapiSettings(certificatePath, certificatePassword))
+        { }
 
         #region Отправка запросов к API Яндекса
 
         private string HttpRequest(string method, string parametersJson, bool sign = false)
         {
-            var request = (HttpWebRequest)WebRequest.Create(ApiAddress);
-            request.ClientCertificates.Add(new X509Certificate2(CertificatePath, CertificatePassword));
+            Contract.Requires(!sign || !string.IsNullOrWhiteSpace(this.Setting.MasterToken), "Financial operations require MasterToken and DefaultLogin to be set");
+
+            var request = (HttpWebRequest)WebRequest.Create(this.Setting.ApiAddress);
+            request.ClientCertificates.Add(new X509Certificate2(this.Setting.CertificatePath, this.Setting.CertificatePassword));
             request.Method = "POST";
             request.Proxy = null;
             request.ContentType = "application/json; charset=utf-8";
 
-            var json = new Dictionary<string, string>();
-
-            Action<string, object> add = (key, value) => json[key] = "\"" + value + "\"";
-
-            add("method", method);
-            add("locale", RequestLocale);
-
-            if (sign)
-            {
-                var signature = new YandexSignature(method, this.DefaultLogin);
-                add("finance_token", signature.Token);
-                add("operation_num", signature.OperationId);
-                add("login", signature.Login);
-            }
-
-            if (parametersJson != null)
-                json["param"] = parametersJson.StartsWith("[") || parametersJson.StartsWith("{") ? parametersJson : ("\"" + parametersJson + "\"");
-
-            var message = json
-                .Where(x => x.Value != null)
-                .Select(x => string.Format("\"{0}\": {1}", x.Key, x.Value))
-                .Aggregate(new StringBuilder(), (sb, x) => sb.AppendFormat("{0}, ", x))
-                .ToString()
-                .TrimEnd(',', ' ');
-            message = string.Format("{{{0}}}", message);
-
-            var encoding = new UTF8Encoding();
-            var data = encoding.GetBytes(message);
-            string responseString;
+            var message = CreatePostMessage(method, parametersJson, sign);
+            var data = Encoding.UTF8.GetBytes(message);
 
             request.ContentLength = data.Length;
             using (var requestStream = request.GetRequestStream())
@@ -96,8 +57,36 @@ namespace Yandex.Direct
             using (var response = (HttpWebResponse)request.GetResponse())
             using (var stream = response.GetResponseStream())
             using (var responseStream = new StreamReader(stream))
-                responseString = responseStream.ReadToEnd();
-            return responseString;
+                return responseStream.ReadToEnd();
+        }
+
+        private string CreatePostMessage(string method, string parametersJson, bool sign)
+        {
+            var json = new Dictionary<string, string>();
+            Action<string, object> add = (key, value) => json[key] = "\"" + value + "\"";
+            add("method", method);
+            add("locale", typeof(YapiLanguage).GetField(this.Setting.Language.ToString()).GetCustomAttributes(typeof(JsonPropertyAttribute), false).Cast<JsonPropertyAttribute>().First().PropertyName);
+
+            if (sign)
+            {
+                var signature = new YandexSignature(this.Setting.MasterToken, method, this.Setting.DefaultLogin);
+                add("finance_token", signature.Token);
+                add("operation_num", signature.OperationId);
+                add("login", signature.Login);
+            }
+
+            if (parametersJson != null)
+                if (parametersJson.StartsWith("[") || parametersJson.StartsWith("{"))
+                    json["param"] = parametersJson;
+                else
+                    json["param"] = "\"" + parametersJson + "\"";
+
+            var merged = json
+                .Where(x => x.Value != null)
+                .Select(x => string.Format("\"{0}\": {1}", x.Key, x.Value))
+                .Merge(", ");
+
+            return string.Format("{{{0}}}", merged);
         }
 
         private T Request<T>(string method, object requestData = null, bool sign = false)
@@ -172,12 +161,13 @@ namespace Yandex.Direct
 
         public int[] CreateOrUpdateBanners(params BannerInfo[] banners)
         {
+            Contract.Requires(banners != null && banners.Any());
             return Request<int[]>(ApiCommand.CreateOrUpdateBanners, banners);
         }
 
         public ClientUnitInfo[] GetClientsUnits(params string[] logins)
         {
-            Contract.Requires(logins!= null && logins.Any());
+            Contract.Requires(logins != null && logins.Any());
             return Request<ClientUnitInfo[]>(ApiCommand.GetClientsUnits, logins);
         }
     }
