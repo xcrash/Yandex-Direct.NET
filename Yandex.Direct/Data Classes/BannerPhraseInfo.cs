@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Yandex.Direct
 {
@@ -21,19 +23,16 @@ namespace Yandex.Direct
         public decimal? Price { get; set; }
         public decimal? ContextPrice { get; set; }
 
-        [JsonIgnore]
-        public AutoBudgetPriorityType? AutoBudgetPriority
-        {
-            get { return _autoBudgetPriority == null ? (AutoBudgetPriorityType?)null : (AutoBudgetPriorityType)Enum.Parse(typeof(AutoBudgetPriorityType), _autoBudgetPriority); }
-            set { _autoBudgetPriority = value == null ? null : value.ToString(); }
-        }
-        [JsonProperty("AutoBudgetPriority"), DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string _autoBudgetPriority;
+        public AutoBudgetPriorityType? AutoBudgetPriority { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum AutoBudgetPriorityType
         {
+            [EnumMember(Value = "Low")]
             Low,
+            [EnumMember(Value = "Medium")]
             Medium,
+            [EnumMember(Value = "High")]
             High,
         }
     }

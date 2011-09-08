@@ -4,16 +4,10 @@ using System;
 
 namespace Yandex.Direct.Tests
 {
-    
-    
-    /// <summary>
-    ///This is a test class for YapiSettingsTest and is intended
-    ///to contain all YapiSettingsTest Unit Tests
-    ///</summary>
-    [TestClass()]
+    [TestClass]
     public class YapiSettingsTest
     {
-        [TestMethod, Description("Секция yandex.direct читается")]
+        [TestMethod, Description("Section yandex.direct can be read from app.config")]
         public void SettingsCanBeReadFromConfiguration()
         {
             var settings = YapiSettings.FromConfiguration();

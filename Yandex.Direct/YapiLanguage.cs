@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Yandex.Direct
@@ -8,15 +9,15 @@ namespace Yandex.Direct
     public enum YapiLanguage
     {
         ///<summary>Английский</summary>
-        [JsonProperty("en")]
+        [EnumMember(Value = "en")]
         English,
 
         ///<summary>Русский</summary>
-        [JsonProperty("ru")]
+        [EnumMember(Value = "ru")]
         Russian,
-        
+
         ///<summary>Украинский</summary>
-        [JsonProperty("ua")]
+        [EnumMember(Value = "ua")]
         Ukrainian,
     }
 }

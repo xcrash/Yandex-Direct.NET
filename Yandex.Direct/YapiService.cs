@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Usings
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -8,11 +9,14 @@ using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+#endregion
 
 namespace Yandex.Direct
 {
     public partial class YapiService
     {
+        #region Constructors and Properties
+
         public YapiSettings Setting { get; private set; }
 
         private JsonSerializerSettings JsonSettings { get; set; }
@@ -25,6 +29,7 @@ namespace Yandex.Direct
                 new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.Ignore,
                     Converters = { new IsoDateTimeConverter { DateTimeFormat = "yyyy-MM-dd" } }
                 };
 
@@ -45,12 +50,13 @@ namespace Yandex.Direct
             : this(new YapiSettings(certificatePath, certificatePassword))
         { }
 
+        #endregion
+
         #region Отправка запросов к API Яндекса
 
         private string HttpRequest(string method, string parametersJson, bool sign = false)
         {
             Contract.Requires(!sign || !string.IsNullOrWhiteSpace(this.Setting.MasterToken), "Financial operations require MasterToken and Login to be set");
-
             var request = (HttpWebRequest)WebRequest.Create(this.Setting.ApiAddress);
             request.ClientCertificates.Add(new X509Certificate2(this.Setting.CertificatePath, this.Setting.CertificatePassword));
             request.Method = "POST";
@@ -73,9 +79,9 @@ namespace Yandex.Direct
         private string CreatePostMessage(string method, string parametersJson, bool sign)
         {
             var json = new Dictionary<string, string>();
-            Action<string, object> add = (key, value) => json[key] = "\"" + value + "\"";
+            Action<string, object> add = (key, value) => json[key] = value.ToString().StartsWith("\"") ? value.ToString() : "\"" + value + "\"";
             add("method", method);
-            add("locale", typeof(YapiLanguage).GetField(this.Setting.Language.ToString()).GetCustomAttributes(typeof(JsonPropertyAttribute), false).Cast<JsonPropertyAttribute>().First().PropertyName);
+            add("locale", JsonConvert.SerializeObject(this.Setting.Language, new StringEnumConverter()));
 
             if (sign)
             {
@@ -130,11 +136,17 @@ namespace Yandex.Direct
 
         #endregion
 
-        #region GetClientLogins
+        #region Clients
 
         public List<ShortClientInfo> GetClientLogins()
         {
             return Request<List<ShortClientInfo>>(ApiCommand.GetClientsList);
+        }
+
+        public ClientUnitInfo[] GetClientsUnits(params string[] logins)
+        {
+            Contract.Requires(logins != null && logins.Any());
+            return Request<ClientUnitInfo[]>(ApiCommand.GetClientsUnits, logins);
         }
 
         #endregion
@@ -163,6 +175,8 @@ namespace Yandex.Direct
 
         #endregion
 
+        #region Banners
+
         public List<BannerInfo> GetBanners(int campId)
         {
             var request = new BannerRequestInfo { CampaignId = new[] { campId } };
@@ -175,10 +189,33 @@ namespace Yandex.Direct
             return Request<int[]>(ApiCommand.CreateOrUpdateBanners, banners);
         }
 
-        public ClientUnitInfo[] GetClientsUnits(params string[] logins)
+        #endregion
+
+        #region Reporting
+
+        public int CreateReport(NewReportInfo reportInfo)
         {
-            Contract.Requires(logins != null && logins.Any());
-            return Request<ClientUnitInfo[]>(ApiCommand.GetClientsUnits, logins);
+            Contract.Requires(reportInfo != null && reportInfo.Limit.HasValue ^ reportInfo.Offset.HasValue);
+            return Request<int>(ApiCommand.CreateNewReport, reportInfo);
         }
+
+        public ReportInfo[] ListReports()
+        {
+            return Request<ReportInfo[]>(ApiCommand.GetReportList);
+        }
+
+        public GoalInfo[] GetStatGoals(int campId)
+        {
+            return Request<GoalInfo[]>(ApiCommand.GetStatGoals, new StatGoalRequestInfo(campId));
+        }
+
+        public void DeleteReport(int reportId)
+        {
+            var result = Request<int>(ApiCommand.DeleteReport, reportId);
+            if (result!= 1)
+                throw new ApplicationException("Плохой ответ. Должен вернуть: 1. Венул: " + result);
+        }
+
+        #endregion
     }
 }

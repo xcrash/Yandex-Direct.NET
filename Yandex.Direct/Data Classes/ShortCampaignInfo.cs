@@ -8,7 +8,7 @@ namespace Yandex.Direct
     public class ShortCampaignInfo
     {
         [JsonProperty("CampaignID")]
-        public long Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Login { get; set; }
         public DateTime StartDate { get; set; }

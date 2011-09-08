@@ -37,11 +37,24 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data Classes\Enums\DateGroupingType.cs" />
+    <Compile Include="Data Classes\NewReportFilterInfo.cs" />
+    <Compile Include="Data Classes\NewReportInfo.cs" />
+    <Compile Include="Data Classes\Enums\ReportColumn.cs" />
+    <Compile Include="Data Classes\Enums\ReportCompressType.cs" />
+    <Compile Include="Data Classes\Enums\PageFilterType.cs" />
+    <Compile Include="Data Classes\Enums\PositionFilterType.cs" />
+    <Compile Include="Data Classes\ReportInfo.cs" />
+    <Compile Include="Data Classes\GoalInfo.cs" />
+    <Compile Include="Data Classes\Enums\ReportType.cs" />
+    <Compile Include="Data Classes\Enums\ReportStatus.cs" />
+    <Compile Include="Data Classes\StatGoalRequestInfo.cs" />
     <Compile Include="YapiService.ApiCommands.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="YapiLanguage.cs" />
