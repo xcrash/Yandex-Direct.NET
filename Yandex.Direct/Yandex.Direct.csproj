@@ -58,6 +58,7 @@
     <Compile Include="Data Classes\Enums\ReportType.cs" />
     <Compile Include="Data Classes\Enums\ReportStatus.cs" />
     <Compile Include="Data Classes\StatGoalRequestInfo.cs" />
+    <Compile Include="PhrasePriceInfo.cs" />
     <Compile Include="YapiService.ApiCommands.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="YapiLanguage.cs" />

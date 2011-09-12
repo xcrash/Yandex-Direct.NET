@@ -243,5 +243,14 @@ namespace Yandex.Direct
         }
 
         #endregion
+
+		#region Prices
+		public void UpdatePrices(PhrasePriceInfo[] prices)
+		{
+			var result = Request<int>(ApiCommand.UpdatePrices, prices);
+			if (result != 1)
+				throw new Exception("Error. ReturnCode <> 1; ReturnCode = " + result);
+		}
+		#endregion
     }
 }

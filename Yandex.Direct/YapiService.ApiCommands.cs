@@ -1,4 +1,6 @@
-﻿namespace Yandex.Direct
+﻿using System;
+
+namespace Yandex.Direct
 {
     public partial class YapiService
     {
@@ -15,6 +17,7 @@
             public const string CreateOrUpdateBanners = "CreateOrUpdateBanners";
             public const string GetClientsUnits = "GetClientsUnits";
             public const string GetStatGoals = "GetStatGoals";
+        	public const string UpdatePrices = "UpdatePrices";
         }
     }
 }
