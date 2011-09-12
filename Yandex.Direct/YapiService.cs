@@ -1,7 +1,9 @@
 ﻿#region Usings
 using System;
 using System.Collections.Generic;
+#if NET4
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -23,7 +25,11 @@ namespace Yandex.Direct
 
         public YapiService(YapiSettings settings)
         {
+#if NET4
             Contract.Requires(settings != null);
+#else
+			if (settings == null) throw new ArgumentNullException("settings");
+#endif
             this.Setting = settings;
             this.JsonSettings =
                 new JsonSerializerSettings
@@ -54,10 +60,14 @@ namespace Yandex.Direct
 
         #region Отправка запросов к API Яндекса
 
-        private string HttpRequest(string method, string parametersJson, bool sign = false)
+    	private string HttpRequest(string method, string parametersJson, bool sign)
         {
+#if NET4
             Contract.Requires(!sign || !string.IsNullOrWhiteSpace(this.Setting.MasterToken), "Financial operations require MasterToken and Login to be set");
-            var request = (HttpWebRequest)WebRequest.Create(this.Setting.ApiAddress);
+#else
+			if(!(!sign || !string.IsNullOrEmpty(this.Setting.MasterToken))) throw new InvalidOperationException("Financial operations require MasterToken and Login to be set");
+#endif
+			var request = (HttpWebRequest)WebRequest.Create(this.Setting.ApiAddress);
             request.ClientCertificates.Add(new X509Certificate2(this.Setting.CertificatePath, this.Setting.CertificatePassword));
             request.Method = "POST";
             request.Proxy = null;
@@ -105,7 +115,17 @@ namespace Yandex.Direct
             return string.Format("{{{0}}}", merged);
         }
 
-        private T Request<T>(string method, object requestData = null, bool sign = false)
+		private T Request<T>(string method)
+		{
+			return Request<T>(method, null);
+		}
+
+		private T Request<T>(string method, object requestData)
+		{
+			return Request<T>(method, requestData, false);
+		}
+
+        private T Request<T>(string method, object requestData, bool sign)
         {
             var json = HttpRequest(method, requestData == null ? null : SerializeToJson(requestData), sign);
             var error = JsonConvert.DeserializeObject<YandexErrorInfo>(json, JsonSettings);
@@ -145,11 +165,13 @@ namespace Yandex.Direct
 
         public ClientUnitInfo[] GetClientsUnits(params string[] logins)
         {
+#if NET4
             Contract.Requires(logins != null && logins.Any());
+#endif
             return Request<ClientUnitInfo[]>(ApiCommand.GetClientsUnits, logins);
         }
 
-        #endregion
+    	#endregion
 
         #region GetClientCampaigns
 
@@ -185,7 +207,9 @@ namespace Yandex.Direct
 
         public int[] CreateOrUpdateBanners(params BannerInfo[] banners)
         {
+#if NET4
             Contract.Requires(banners != null && banners.Any());
+#endif
             return Request<int[]>(ApiCommand.CreateOrUpdateBanners, banners);
         }
 
@@ -195,7 +219,9 @@ namespace Yandex.Direct
 
         public int CreateReport(NewReportInfo reportInfo)
         {
+#if NET4
             Contract.Requires(reportInfo != null && reportInfo.Limit.HasValue ^ reportInfo.Offset.HasValue);
+#endif
             return Request<int>(ApiCommand.CreateNewReport, reportInfo);
         }
 
