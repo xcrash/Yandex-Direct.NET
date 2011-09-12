@@ -25,6 +25,8 @@ namespace Yandex.Direct
 
         public AutoBudgetPriorityType? AutoBudgetPriority { get; set; }
 
+    	public string IsRubric { get; set; }
+
         [JsonConverter(typeof(StringEnumConverter))]
         public enum AutoBudgetPriorityType
         {
